@@ -1,0 +1,93 @@
+diff --git a/package.json b/package.json
+index 8b6e6f7..119309e 100644
+--- a/package.json
++++ b/package.json
+@@ -8,6 +8,7 @@
+     "speedscope": "./bin/cli.mjs"
+   },
+   "scripts": {
++    "build:widget": "esbuild src/widget.tsx --bundle --outfile=dist/widget.js --format=esm --platform=browser --loader:.woff2=file",
+     "deploy": "./scripts/deploy.sh",
+     "prepack": "./scripts/prepack.sh --outdir \"$(pwd)/dist/release\" --protocol file",
+     "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx'",
+diff --git a/src/import/bg-flamegraph.ts b/src/import/bg-flamegraph.ts
+index aa776cf..ffb845e 100644
+--- a/src/import/bg-flamegraph.ts
++++ b/src/import/bg-flamegraph.ts
+@@ -25,6 +25,23 @@ function parseBGFoldedStacks(contents: TextFileContent): BGSample[] {
+   return samples
+ }
+ 
++function parseProfireStacks(lines: Iterable<string>): BGSample[] {
++  const samples: BGSample[] = []
++  for (const line of lines) {
++    const match = /^(.*) (\d+)$/gm.exec(line)
++    if (!match) continue
++    const stack = match[1]
++    const n = match[2]
++
++    samples.push({
++      stack: stack.split(';').map(name => ({key: name, name: name})),
++      duration: parseInt(n, 10),
++    })
++  }
++
++  return samples
++}
++
+ export function importFromBGFlameGraph(contents: TextFileContent): Profile | null {
+   const parsed = parseBGFoldedStacks(contents)
+   const duration = parsed.reduce((prev: number, cur: BGSample) => prev + cur.duration, 0)
+@@ -37,3 +54,16 @@ export function importFromBGFlameGraph(contents: TextFileContent): Profile | nul
+   }
+   return profile.build()
+ }
++
++export function importFromProfire(lines: Iterable<string>): Profile | null {
++  const parsed = parseProfireStacks(lines)
++  const duration = parsed.reduce((prev: number, cur: BGSample) => prev + cur.duration, 0)
++  const profile = new StackListProfileBuilder(duration)
++  if (parsed.length === 0) {
++    return null
++  }
++  for (let sample of parsed) {
++    profile.appendSampleWithWeight(sample.stack, sample.duration)
++  }
++  return profile.build()
++}
+\ No newline at end of file
+diff --git a/src/speedscope.tsx b/src/speedscope.tsx
+index 9f49e5d..f826170 100644
+--- a/src/speedscope.tsx
++++ b/src/speedscope.tsx
+@@ -1,6 +1,7 @@
+ import {h, render} from 'preact'
+ import {ApplicationContainer} from './views/application-container'
+ import {ThemeProvider} from './views/themes/theme'
++import {loadFromFoldedText} from './widget'
+ 
+ console.log(`speedscope v${require('../package.json').version}`)
+ 
+@@ -16,10 +17,14 @@ if (module.hot) {
+ }
+ */
+ 
+-render(
+-  <ThemeProvider>
+-    <ApplicationContainer />
+-  </ThemeProvider>,
+-  document.body,
+-  document.body.lastElementChild || undefined,
+-)
++console.log("DEMO LOADED")
++
++if (location.hash === '#demo') {
++  const folded = `
++main;init 10
++main;parse 30
++main;render 60
++`.trim()
++
++    loadFromFoldedText(folded)
++}
+\ No newline at end of file

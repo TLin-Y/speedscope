@@ -1,6 +1,7 @@
 import {h, render} from 'preact'
 import {ApplicationContainer} from './views/application-container'
 import {ThemeProvider} from './views/themes/theme'
+import {loadFromFoldedText} from './widget'
 
 console.log(`speedscope v${require('../package.json').version}`)
 
@@ -16,10 +17,14 @@ if (module.hot) {
 }
 */
 
-render(
-  <ThemeProvider>
-    <ApplicationContainer />
-  </ThemeProvider>,
-  document.body,
-  document.body.lastElementChild || undefined,
-)
+console.log("DEMO LOADED")
+
+if (location.hash === '#demo') {
+  const folded = `
+main;init 10
+main;parse 30
+main;render 60
+`.trim()
+
+    loadFromFoldedText(folded)
+}

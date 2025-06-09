@@ -8,6 +8,7 @@
     "speedscope": "./bin/cli.mjs"
   },
   "scripts": {
+    "build:widget": "esbuild src/widget.tsx --bundle --outfile=dist/widget.js --format=esm --platform=browser --loader:.woff2=file",
     "deploy": "./scripts/deploy.sh",
     "prepack": "./scripts/prepack.sh --outdir \"$(pwd)/dist/release\" --protocol file",
     "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx'",
