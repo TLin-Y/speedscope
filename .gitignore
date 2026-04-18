@@ -5,3 +5,7 @@ dist
 coverage
 .vscode
 .npmrc
+use-cases.md
+esbuild.config.js
+speedscope-widget.code-workspace
+.gitignore
