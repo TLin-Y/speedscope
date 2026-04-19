@@ -14,12 +14,15 @@ export const initSearchIndexAtom = new Atom<number>(-1, 'initSearchIndex')
 export const selectedSearchIndexAtom = new Atom<number>(0, 'selectedSearchIndex')
 
 // Atom to hold special frame -> colorIndex overrides mapping
-export const frameColorOverridesAtom = new Atom<Record<string, number>>({
-  total: 5,
-  App: 1,
-  GC: 12,
-  Compiler: 16,
-}, 'frameColorOverrides');
+export const frameColorOverridesAtom = new Atom<Record<string, number>>(
+  {
+    total: 5,
+    App: 1,
+    GC: 12,
+    Compiler: 16,
+  },
+  'frameColorOverrides',
+)
 
 // True if recursion should be flattened when viewing flamegraphs
 export const flattenRecursionAtom = new Atom<boolean>(false, 'flattenRecursion')
@@ -57,6 +60,9 @@ export const moreInformationFrameAtom = new Atom<string>('', 'moreInformationFra
 export const displayTableAtom = new Atom<boolean>(true, 'displayTable')
 export const scrollToAtom = new Atom<boolean>(false, 'scrollTo')
 export const reverseFlamegraphAtom = new Atom<boolean>(false, 'reverse')
+
+// True if reverse button should wait for flamegraph provider upload (default false)
+export const waitReverseFlamegraphAtom = new Atom<boolean>(false, 'waitReverse')
 
 // The query used in top-level views
 //
@@ -108,7 +114,7 @@ export enum SortField {
   SELF,
   TOTAL,
   COUNT,
-  DIFF
+  DIFF,
 }
 
 export enum SortDirection {
@@ -124,17 +130,17 @@ export interface SortMethod {
 // The table sorting method using for the sandwich view, specifying the column
 // to sort by, and the direction to sort that clumn.
 export const tableSortMethodAtom = new Atom<SortMethod>(
-        {
-          field: SortField.TOTAL,
-          direction: SortDirection.DESCENDING,
-        },
-        'tableSortMethod',
+  {
+    field: SortField.TOTAL,
+    direction: SortDirection.DESCENDING,
+  },
+  'tableSortMethod',
 )
 
 // True if name column should be right-aligned (tail first) instead of left-aligned (head first)
 export const nameAlignRightAtom = new Atom<boolean>(false, 'nameAlignRight')
 
 export function disposeProfileAtom() {
-  profileGroupAtom.clearHoverNode();
-  profileGroupAtom.set(null);
+  profileGroupAtom.clearHoverNode()
+  profileGroupAtom.set(null)
 }
